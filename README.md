@@ -40,6 +40,13 @@ Configuration of the driver placed in _config.yaml_ file.
 
 You may need to change the *vendor_id* and the *product_id* but I'm not sure (You device can have the same values as mine, but if it is not you can run the *lsusb* command to find yours).
 
+Buttons assigned in the order: tablet (from left to right) then stylus (from upper to bottom). You can assign to them any ecode prefixed by BTN_ and their combinations separating them with a plus (+) sign.
+
+To list all the possible key ecodes you may run:
+```
+python -c "from evdev import ecodes; print([x for x in dir(ecodes) if 'BTN_' in x])"
+```
+
 ## Credits
 
 Some parts of code are taken from: https://github.com/Mantaseus/Huion_Kamvas_Linux
