@@ -2,6 +2,7 @@
 
 import os
 
+
 # Specification of the device https://python-evdev.readthedocs.io/en/latest/
 from evdev import UInput, ecodes, AbsInfo
 # Establish usb communication with device
@@ -13,11 +14,12 @@ path = os.path.join(os.path.dirname(__file__), "config.yaml")
 with open(path, "r") as f:
     config = yaml.load(f, Loader=yaml.FullLoader)
 
+keys = [ecodes.BTN_TOOL_PEN, ecodes.BTN_TOUCH]
+# Get the required ecodes from configuration
+keys.extend([ecodes.ecodes[x] for c in config["buttons"] for x in c.split("+")])
+
 pen_events = {
-    ecodes.EV_KEY: [
-        ecodes.BTN_TOOL_PEN,
-        ecodes.BTN_TOUCH
-    ],
+    ecodes.EV_KEY: keys,
     ecodes.EV_ABS: [
         (ecodes.ABS_X, AbsInfo(value=0, min=0, max=config['pen']['max_x'], fuzz=0, flat=0, resolution=config["pen"]["resolution_x"])),
         (ecodes.ABS_Y, AbsInfo(value=0, min=0, max=config['pen']['max_y'], fuzz=0, flat=0, resolution=config["pen"]["resolution_y"])),
@@ -75,15 +77,37 @@ while True:
                 vpen.write(ecodes.EV_KEY, ecodes.BTN_TOUCH, 0)
             # Flush
             vpen.syn()
+
+        if data[0] == 2: # Button actions
+            actions = []
+            if data[1] == 2: # First button
+                actions.extend([-2, 1])
+            elif data[1] == 4: # Second button
+                actions.extend([-1, 2])
+            elif data[1] == 6: # First and second button
+                actions.extend([1, 2])
+            
+            if data[3] == 44: # Third button
+                actions.extend([-4, -5, 3])
+            elif data[3] == 43: # Fourth burron
+                actions.extend([-3, -5, 4])
+            elif data[3] == 29 and data[1] == 1:
+                actions.extend([-3, -4, 5])
+            
+            if len(actions) == 0:
+                actions = [-1, -2, -3, -4, -5]
+
+            for action in actions:
+                key_codes = config["buttons"][abs(action)-1].split("+")
+                for key in key_codes:
+                    act = ecodes.ecodes[key]
+                    # press types: 0 - up; 1 - down; 2 - hold
+                    vpen.write(ecodes.EV_KEY, act, 1 if action > 0 else 0)
+
+            vpen.syn()
+
             
     except usb.core.USBError as e:
-        if pen_hovering:
-            # Need to emit event BTN_TOOL_PEN = 0 when pen is not hovering,
-            # just for compliance with the specs.
-            # https://www.kernel.org/doc/Documentation/input/event-codes.txt
-            vpen.write(ecodes.EV_KEY, ecodes.BTN_TOOL_PEN, 0)
-            pen_hovering = False
-            vpen.syn()
         if e.args[0] == 19:
             vpen.close()
             raise Exception('Device has been disconnected')

@@ -7,3 +7,10 @@ pen:
     max_pressure: 2047
     resolution_x: 20
     resolution_y: 30
+buttons:
+    - BTN_MIDDLE # tablet 1st
+    - BTN_RIGHT # tablet 2nd
+    - BTN_0 # tablet 3rd
+    - BTN_1 # tablet 4th
+    - BTN_STYLUS # stylus upper
+    - BTN_STYLUS2 # stylus bottom (doesn't work and isn't used)
