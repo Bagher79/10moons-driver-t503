@@ -5,6 +5,8 @@ Simple driver for 10moons T503 tablet for linux
 ## About
 
 Driver which provides basic functionality for 10moons T503 tablet:
+* 4 buttons on the tablet itself
+* Top button of the pen
 * Correct X and Y positioning
 * Pressure sensitivity
 
@@ -48,5 +50,5 @@ I spent too much time searching about and trying to fix these bugs, and this web
 
 ## Known issues
 
-- No button works;
+- It appears that only BTN prefixed ecodes can be emitted for the buttons (EV_KEY);
 - When the bottom button of the pen is pressed, the driver crashes and you need to reconnect the tablet in the USB and then restart the driver.
